@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <title>Kreslení</title>
+    <script>
+        let img = new Image();
+        img.src = "http://dl.damto.cz/mimon.png";
+        let cnv,ctx;
+        let xImg = 300;
+        let yImg = 200;
+        let wImg = 50;
+        let hImg = 50;
+        let rotaceImg = 0;
+        let s1, s2;
+        let a =0;
+        function puntik(x,y) {
+            ctx.beginPath();
+            ctx.fillStyle = "yellow";
+            ctx.arc(x, y, 2, 0, 2*Math.PI);
+            ctx.fill();
+        }
+        function kresli() {
+            ctx.clearRect(0,0,cnv.width,cnv.height);
+            s1 = cnv.width;
+            s2 = cnv.height;
+            ctx.beginPath();
+            ctx.lineWidth = 8;
+            ctx.strokeStyle = "red";
+            ctx.moveTo(0,0);
+            ctx.lineTo(200, 100);
+            ctx.lineTo(200, 50);
+            ctx.stroke();
+
+            //mic
+            mic.x = mic.x + mic.rychlostX;
+            mic.y = mic.y + mic.rychlostY;
+            //kontrola okraju
+            if (mic.x+mic.r >= cnv.width) {
+                mic.rychlostX = -1 * mic.rychlostX;
+            }
+            if (mic.x - mic.r <= 0) {
+                mic.x = 50;
+                mic.rychlostX = mic.rychlostX+8;
+            }
+
+            if (mic.x - mic.r <= 0) {
+                mic.x = 50;
+                mic.rychlostX = mic.rychlostX+8;
+            }
+
+            if (mic.y  - mic.r< 0) {
+                mic.y = mic.y + cnv.height;
+                if (mic.x+2*mic.r <= cnv.width){
+                    mic.rychlost = mic.rychlostX*1.3;
+                }
+            }
+            if (mic.y + mic.r > cnv.height) {
+                mic.y = mic.y - cnv.height;
+                mic.x++;
+            }
+
+            //TODO zbyvajici okraje
+
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = "green";
+            ctx.arc(mic.x, mic.y, mic.r, 0, 2*Math.PI);
+            ctx.stroke();
+
+            //postava...
+            //pohyb
+            if (postava.moveLeft) {
+                postava.x = postava.x -4;
+            }
+            if (postava.moveRight) {
+                postava.x = postava.x +4;
+            }
+            if (postava.moveUp) {
+                postava.y = postava.y -4;
+            }
+            if (postava.moveDown) {
+                postava.y = postava.y +4;
+            }
+            //pálka:
+            if (palka1.moveUp) {
+                palka1.y = postava.y -4;
+            }
+            if (palka1.moveDown) {
+                palka1.y = postava.y +4;
+            }
+
+            //kontrola okraju
+            if (postava.x+postava.r > cnv.width) {
+                postava.x = cnv.width - postava.r;
+            }
+            if (postava.x  - postava.r < 0 ) {
+                postava.x = postava.r;
+            }
+            if (postava.y  - postava.r< 0) {
+                postava.y = postava.r;
+            }
+            if (postava.y + postava.r > cnv.height) {
+                postava.y = cnv.height - postava.r;
+            }
+
+            /*if (mic.x+ mic.r > cnv.width) {
+                mic.x = (-1)*mic.rychlostX;
+            }
+            if (mic.x  - mic.r < 0 ) {
+                mic.x = (-1)*mic.rychlostX;
+            }
+            if (mic.y  - mic.r< 0) {
+                mic.y = mic.y + cnv.height;
+            }
+            if (mic.y + mic.r > cnv.height) {
+                mic.y = mic.y - cnv.height;
+            }*/
+
+            //TODO zbyvajici okraje
+            //vykresleni
+            ctx.beginPath();
+            ctx.fillStyle = "blue";
+            ctx.arc(postava.x, postava.y, postava.r, 0, 2*Math.PI);
+            ctx.fill();
+
+            xImg = xImg -1;
+            yImg = yImg -1;
+            rotaceImg = rotaceImg -0.05;
+            ctx.save(); //ulozi aktualni nastaveni platna
+            ctx.translate(xImg+wImg/2, yImg+hImg/2); //posunuti stredu os do stredu obrazku
+            ctx.rotate(rotaceImg); //otoceni o konkretni uhel
+            ctx.drawImage(img, -wImg/2, -hImg/2, wImg, hImg); //pozice obrazku udava jeho levy horni roh v posunutych osach
+            puntik(0,0); //vykresluje prusecik posunutych os
+            ctx.restore(); //obnovi nastaveni platna z ulozeneho
+
+            ctx.beginPath();
+            ctx.lineWidth = palka1.linewidth;
+            ctx.strokeStyle = "red";
+            ctx.moveTo(palka1.x,palka1.y - 50);
+            ctx.lineTo(palka1.x, palka1.y + 50);
+            ctx.stroke();
+            if (a===0){
+                poNacteni();
+                a++;
+            }
+        }
+
+        //pingpongová pálka
+
+
+        //stisk kláves
+        function onKeyDown(event) {
+            if (event.key === "ArrowUp") {
+                postava.moveUp = true;
+                palka1.moveUp = true;
+            }
+            if (event.key === "ArrowDown") {
+                postava.moveDown = true;
+                palka1.moveDown = true;
+            }
+            if (event.key === "ArrowLeft") {
+                postava.moveLeft = true;
+            }
+            if (event.key === "ArrowRight") {
+                postava.moveRight = true;
+            }
+
+        }
+
+        function onKeyUp(event) {
+            if (event.key === "ArrowUp") {
+                postava.moveUp = false;
+                palka1.moveUp = false;
+            }
+            if (event.key === "ArrowDown") {
+                postava.moveDown = false;
+                palka1.moveDown = false;
+            }
+            if (event.key === "ArrowLeft") {
+                postava.moveLeft = false;
+            }
+            if (event.key === "ArrowRight") {
+                postava.moveRight = false;
+            }
+        }
+        let postava = {};
+        let mic = {};
+        let palka1 = {};
+        function poNacteni() {
+            palka1.linewidth = 5;
+            palka1.x = s1 - palka1.linewidth;
+            palka1.y = s2/2;
+            postava.x = 500;
+            postava.y = 300;
+            postava.r = 50;
+            postava.moveUp = false;
+            postava.moveDown = false;
+            postava.moveLeft = false;
+            postava.moveRight = false;
+
+            mic.x = 100;
+            mic.y = 200;
+            mic.r = 20;
+            mic.rychlostX = Math.trunc(16*Math.random())-8;
+            mic.rychlostY = Math.trunc(16*Math.random())-8;
+
+            cnv = document.getElementById("platno");
+            ctx = cnv.getContext("2d");
+            setInterval(kresli, 20);
+        }
+    </script>
+</head>
+<body onload="poNacteni()" onkeydown="onKeyDown(event)" onkeyup="onKeyUp(event)">
+
+<h1>Kreslení</h1>
+
+<canvas id="platno" width="600" height="400" style="background-color: gainsboro"></canvas>
+
+</body>
+</html>
